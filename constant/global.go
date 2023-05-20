@@ -7,3 +7,5 @@ const (
 	SOCKS
 	MIXED
 )
+
+const DefaultPort = 5678
