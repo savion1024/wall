@@ -1,4 +1,4 @@
-package constant
+package global
 
 type WorkMode int
 
@@ -8,4 +8,4 @@ const (
 	MIXED
 )
 
-const DefaultPort = 5678
+const DefaultPort = "5678"

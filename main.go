@@ -3,7 +3,11 @@ package main
 import (
 	"flag"
 	"github.com/savion1024/wall/config"
+	"github.com/savion1024/wall/server"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -19,4 +23,10 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+	s, err := server.NewServer(g)
+	s.Run()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	<-sigCh
 }

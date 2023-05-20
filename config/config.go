@@ -24,9 +24,9 @@ type Proxy interface {
 type LocalConfig struct {
 	ProxyMode      C.WorkMode
 	HttpProxyAddr  string
-	HttpProxyPort  int
+	HttpProxyPort  string
 	MixedProxyAddr string
-	MixedProxyPort int
+	MixedProxyPort string
 	SocksProxyAddr string
 	SocksProxyPort int
 }
