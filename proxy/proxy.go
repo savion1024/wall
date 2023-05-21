@@ -3,11 +3,11 @@ package proxy
 import "net"
 
 type Proxy struct {
-	host  string
-	port  string
-	name  string
-	alive bool
-	tyoe  string
+	host      string
+	port      string
+	name      string
+	alive     bool
+	proxyType string
 }
 
 func (p *Proxy) Name() string {

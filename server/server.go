@@ -1,11 +1,11 @@
 package server
 
 import (
-	C "github.com/savion1024/wall/config"
-	"github.com/savion1024/wall/tunnel"
-
 	"log"
 	"sync"
+
+	C "github.com/savion1024/wall/config"
+	"github.com/savion1024/wall/tunnel"
 )
 
 var (

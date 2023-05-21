@@ -1,10 +1,11 @@
 package server
 
 import (
+	"net"
+
 	"github.com/savion1024/wall/common"
 	global "github.com/savion1024/wall/constant"
 	"github.com/savion1024/wall/tunnel"
-	"net"
 )
 
 // StartListenHttp catch http request
