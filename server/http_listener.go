@@ -1,12 +1,13 @@
 package server
 
-import "C"
 import (
 	global "github.com/savion1024/wall/constant"
+	"github.com/savion1024/wall/tunnel"
 	"net"
 )
 
-func (s *Server) StartListenHttp(in chan<- C.ConnContext) error {
+// StartListenHttp catch http request
+func (s *Server) StartListenHttp(in chan<- *tunnel.ConnContext) error {
 	if s.config.LC.ProxyMode != global.HTTP {
 		return nil
 	}
@@ -31,7 +32,11 @@ func (s *Server) StartListenHttp(in chan<- C.ConnContext) error {
 	return nil
 }
 
-func handleConn(conn net.Conn, in chan<- C.ConnContext) {
-	// TODO find remote proxy
-	// TODO exchange local and remote conn
+// handleConn handle local http connect
+func handleConn(conn net.Conn, in chan<- *tunnel.ConnContext) {
+	// TODO new connContext and push in tcp queue
+	c := tunnel.NewConnContext()
+	c.LocalConn = conn
+	in <- c
+
 }

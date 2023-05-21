@@ -24,6 +24,7 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	s, err := server.NewServer(g)
+
 	s.Run()
 
 	sigCh := make(chan os.Signal, 1)
