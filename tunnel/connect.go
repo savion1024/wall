@@ -4,7 +4,9 @@ import "C"
 import (
 	"context"
 	"github.com/gofrs/uuid/v5"
+	"io"
 	"net"
+	"time"
 )
 
 type ConnContext struct {
@@ -24,10 +26,24 @@ func (c *ConnContext) DialRemote(ctx context.Context, address string) (net.Conn,
 		return nil, err
 	}
 	return remoteConn, nil
-
 }
 
 func NewConnContext() *ConnContext {
 	id, _ := uuid.NewV4()
 	return &ConnContext{ConnId: id}
+}
+
+func (c *ConnContext) exchangeConnData() {
+	ch := make(chan error)
+	leftConn := c.LocalConn
+	rightConn := c.RemoteConn
+	go func() {
+		_, err := io.Copy(WriteOnlyWriter{Writer: leftConn}, ReadOnlyReader{Reader: rightConn})
+		leftConn.SetReadDeadline(time.Now())
+		ch <- err
+	}()
+
+	io.Copy(WriteOnlyWriter{Writer: rightConn}, ReadOnlyReader{Reader: leftConn})
+	rightConn.SetReadDeadline(time.Now())
+	<-ch
 }

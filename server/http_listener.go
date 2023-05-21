@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/savion1024/wall/common"
 	global "github.com/savion1024/wall/constant"
 	"github.com/savion1024/wall/tunnel"
 	"net"
@@ -8,15 +9,14 @@ import (
 
 // StartListenHttp catch http request
 func (s *Server) StartListenHttp(in chan<- *tunnel.ConnContext) error {
-	if s.config.LC.ProxyMode != global.HTTP {
+	if s.config.L.ProxyMode != global.HTTP {
 		return nil
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	addr := s.config.LC.HttpProxyAddr
-	port := s.config.LC.HttpProxyPort
-	bindAddress := net.JoinHostPort(addr, port)
-	l, err := net.Listen("tcp", bindAddress)
+	addr := s.config.L.HttpProxyAddr
+	port := s.config.L.HttpProxyPort
+	l, err := net.Listen("tcp", common.GenAddr(addr, port))
 	if err != nil {
 		return err
 	}
@@ -38,5 +38,4 @@ func handleConn(conn net.Conn, in chan<- *tunnel.ConnContext) {
 	c := tunnel.NewConnContext()
 	c.LocalConn = conn
 	in <- c
-
 }

@@ -3,32 +3,32 @@ package config
 import (
 	"errors"
 	"gopkg.in/yaml.v3"
-	"net"
 	"os"
 
 	C "github.com/savion1024/wall/constant"
 )
 
 type GlobalConfig struct {
-	LC      *LocalConfig
-	Proxies map[string]*Proxy
+	L        *LocalConfig
+	Proxies  map[string]*Proxy `json:"proxies"`
+	WorkMode C.WorkMode        `json:"work-mode"`
 }
 
 type Proxy interface {
 	Name() string
 	Alive() bool
 	LastDelay() uint16
-	Dial() (net.Conn, error)
+	Address() string
 }
 
 type LocalConfig struct {
-	ProxyMode      C.WorkMode
-	HttpProxyAddr  string
-	HttpProxyPort  string
-	MixedProxyAddr string
-	MixedProxyPort string
-	SocksProxyAddr string
-	SocksProxyPort int
+	ProxyMode      C.ProxyMode `json:"proxy-mode"`
+	HttpProxyAddr  string      `json:"http-proxy-addr"`
+	HttpProxyPort  int         `json:"http-proxy-port"`
+	MixedProxyAddr string      `json:"mixed-proxy-addr"`
+	MixedProxyPort int         `json:"mixed-proxy-port"`
+	SocksProxyAddr string      `json:"socks-proxy-addr"`
+	SocksProxyPort int         `json:"socks-proxy-port"`
 }
 
 // Parse config from []byte
@@ -43,12 +43,38 @@ func Parse(filePtah string) (*GlobalConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	g := &GlobalConfig{LC: &LocalConfig{
-		HttpProxyPort: C.DefaultPort,
-	}}
-	if err := yaml.Unmarshal(data, g); err != nil {
+	raw := &RawConfig{}
+	if err := yaml.Unmarshal(data, raw); err != nil {
 		return nil, err
 	}
+	g := ParseRawConfig(raw)
 	// TODO check config
 	return g, nil
+}
+
+func ParseRawConfig(raw *RawConfig) *GlobalConfig {
+	g := &GlobalConfig{
+		L:        &LocalConfig{},
+		Proxies:  map[string]*Proxy{},
+		WorkMode: raw.WorkMode,
+	}
+	g.L.HttpProxyAddr = raw.BindAddress
+	g.L.HttpProxyPort = raw.HttpPort
+	g.L.MixedProxyAddr = raw.BindAddress
+	g.L.MixedProxyPort = raw.MixedPort
+	g.L.SocksProxyAddr = raw.BindAddress
+	g.L.SocksProxyPort = raw.SocksPort
+	return g
+
+}
+
+type RawConfig struct {
+	HttpPort    int        `yaml:"http-port"`
+	SocksPort   int        `yaml:"socks-port"`
+	MixedPort   int        `yaml:"mixed-port"`
+	AllowLan    bool       `yaml:"allow-lan"`
+	BindAddress string     `yaml:"bind-address"`
+	WorkMode    C.WorkMode `yaml:"mode"`
+
+	Proxy []map[string]any `yaml:"proxies"`
 }

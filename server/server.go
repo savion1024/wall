@@ -5,7 +5,6 @@ import (
 	"github.com/savion1024/wall/tunnel"
 
 	"log"
-	"net"
 	"sync"
 )
 
@@ -16,8 +15,8 @@ var (
 func init() {
 	go func() {
 		queue := tcpQueue
-		for conn := range queue {
-			go tunnel.ProcessConn(conn)
+		for c := range queue {
+			go tunnel.ProcessConn(c)
 		}
 	}()
 }
@@ -25,7 +24,6 @@ func init() {
 type Server struct {
 	mu     sync.Mutex
 	config *C.GlobalConfig
-	conn   net.Conn
 }
 
 func NewServer(g *C.GlobalConfig) (*Server, error) {
