@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"log"
+	"github.com/savion1024/wall/logger"
 	"sync"
 
 	C "github.com/savion1024/wall/config"
@@ -26,11 +26,13 @@ func init() {
 type Server struct {
 	mu     sync.Mutex
 	config *C.GlobalConfig
+	logger *logger.Logger
 }
 
 func NewServer(g *C.GlobalConfig) (*Server, error) {
 	s := &Server{
 		config: g,
+		logger: logger.NewStdLogger(true, false, true, true, false),
 	}
 	return s, nil
 }
@@ -38,10 +40,20 @@ func NewServer(g *C.GlobalConfig) (*Server, error) {
 func (s *Server) Run() {
 	err := s.StartListenHttp(tcpQueue)
 	if err != nil {
-		log.Fatalf("start http error")
+		s.logger.Fatalf("Run server failed: %s", err.Error())
 	}
 }
 
 func (s *Server) PrintBaseConfig() {
-	fmt.Println(s.config.L.HttpAddress())
+	fmt.Println("********************* Wall *********************")
+	fmt.Println("***                                          ***")
+	fmt.Println("***       科学来讲, 这太不科学。             ***")
+	fmt.Println("***                     -《要讲科学》        ***")
+	fmt.Println("***                                          ***")
+	fmt.Println("***                                          ***")
+	fmt.Println("************************************************")
+	fmt.Println(" ")
+	fmt.Println(fmt.Sprintf("   WorkMode:    %s ", s.config.WorkMode))
+	fmt.Println(fmt.Sprintf("   ProxyMode:   %s ", s.config.L.ProxyMode.String()))
+	fmt.Println(fmt.Sprintf("   Http Listen: %s ", s.config.L.HttpAddress()))
 }

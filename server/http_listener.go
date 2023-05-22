@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/savion1024/wall/common"
@@ -25,9 +24,8 @@ func (s *Server) StartListenHttp(in chan<- *tunnel.ConnContext) error {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
-				continue
+				s.logger.Errorf("handle conn accept error: %s", err.Error())
 			}
-			fmt.Println("new connect accept")
 			go handleConn(conn, in)
 		}
 	}()
@@ -39,6 +37,5 @@ func handleConn(conn net.Conn, in chan<- *tunnel.ConnContext) {
 	// TODO new connContext and push in tcp queue
 	c := tunnel.NewConnContext()
 	c.LocalConn = conn
-	fmt.Println(fmt.Sprintf("connect id : %s", c.ID()))
 	in <- c
 }

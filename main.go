@@ -22,6 +22,10 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+	if testConfig {
+		log.Println("config parse success")
+		return
+	}
 	s, err := server.NewServer(g)
 
 	s.Run()

@@ -28,6 +28,19 @@ var ModeMapping = map[string]WorkMode{
 	Direct.String(): Direct,
 }
 
+func (p *ProxyMode) String() string {
+	switch *p {
+	case HTTP:
+		return "HTTP"
+	case SOCKS:
+		return "SOCKS"
+	case MIXED:
+		return "MIXED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 func (w WorkMode) String() string {
 	switch w {
 	case Global:
