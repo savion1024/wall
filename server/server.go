@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -16,6 +17,7 @@ func init() {
 	go func() {
 		queue := tcpQueue
 		for c := range queue {
+			fmt.Println(fmt.Sprintf("catch connect: %s", c.ID()))
 			go tunnel.ProcessConn(c)
 		}
 	}()
@@ -38,5 +40,8 @@ func (s *Server) Run() {
 	if err != nil {
 		log.Fatalf("start http error")
 	}
+}
 
+func (s *Server) PrintBaseConfig() {
+	fmt.Println(s.config.L.HttpAddress())
 }

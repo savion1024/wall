@@ -18,7 +18,6 @@ var (
 func main() {
 	flag.StringVar(&configFile, "f", "", "specify configuration file")
 	flag.BoolVar(&testConfig, "t", false, "test configuration and exit")
-
 	g, err := config.Parse(configFile)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -26,7 +25,8 @@ func main() {
 	s, err := server.NewServer(g)
 
 	s.Run()
-
+	s.PrintBaseConfig()
+	log.Println("server start, listening")
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh

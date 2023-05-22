@@ -3,6 +3,7 @@ package tunnel
 import "C"
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -37,11 +38,12 @@ func NewConnContext() *ConnContext {
 func (c *ConnContext) exchangeConnData() {
 	ch := make(chan error)
 	go func() {
+		fmt.Println(fmt.Sprintf(" %s - %s", c.LocalConn.LocalAddr(), c.LocalConn.RemoteAddr()))
 		_, err := io.Copy(WriteOnlyWriter{Writer: c.LocalConn}, ReadOnlyReader{Reader: c.RemoteConn})
 		c.LocalConn.SetReadDeadline(time.Now())
 		ch <- err
 	}()
-
+	fmt.Println(fmt.Sprintf(" %s - %s", c.RemoteConn.LocalAddr(), c.RemoteConn.RemoteAddr()))
 	io.Copy(WriteOnlyWriter{Writer: c.RemoteConn}, ReadOnlyReader{Reader: c.LocalConn})
 	c.RemoteConn.SetReadDeadline(time.Now())
 	<-ch

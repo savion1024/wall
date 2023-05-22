@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/savion1024/wall/common"
 	"gopkg.in/yaml.v3"
 	"os"
 
@@ -23,12 +24,13 @@ type Proxy interface {
 
 type LocalConfig struct {
 	ProxyMode      C.ProxyMode `json:"proxy-mode"`
-	HttpProxyAddr  string      `json:"http-proxy-addr"`
 	HttpProxyPort  int         `json:"http-proxy-port"`
-	MixedProxyAddr string      `json:"mixed-proxy-addr"`
 	MixedProxyPort int         `json:"mixed-proxy-port"`
-	SocksProxyAddr string      `json:"socks-proxy-addr"`
 	SocksProxyPort int         `json:"socks-proxy-port"`
+}
+
+func (l *LocalConfig) HttpAddress() string {
+	return common.GenAddr("*", l.HttpProxyPort)
 }
 
 // Parse config from []byte
@@ -58,23 +60,19 @@ func ParseRawConfig(raw *RawConfig) *GlobalConfig {
 		Proxies:  map[string]*Proxy{},
 		WorkMode: raw.WorkMode,
 	}
-	g.L.HttpProxyAddr = raw.BindAddress
 	g.L.HttpProxyPort = raw.HttpPort
-	g.L.MixedProxyAddr = raw.BindAddress
 	g.L.MixedProxyPort = raw.MixedPort
-	g.L.SocksProxyAddr = raw.BindAddress
 	g.L.SocksProxyPort = raw.SocksPort
 	return g
 
 }
 
 type RawConfig struct {
-	HttpPort    int        `yaml:"http-port"`
-	SocksPort   int        `yaml:"socks-port"`
-	MixedPort   int        `yaml:"mixed-port"`
-	AllowLan    bool       `yaml:"allow-lan"`
-	BindAddress string     `yaml:"bind-address"`
-	WorkMode    C.WorkMode `yaml:"mode"`
+	HttpPort  int        `yaml:"http-port"`
+	SocksPort int        `yaml:"socks-port"`
+	MixedPort int        `yaml:"mixed-port"`
+	AllowLan  bool       `yaml:"allow-lan"`
+	WorkMode  C.WorkMode `yaml:"mode"`
 
 	Proxy []map[string]any `yaml:"proxies"`
 }
