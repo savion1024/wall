@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	global "github.com/savion1024/wall/constant"
 	logger2 "github.com/savion1024/wall/logger"
 	"sync"
 
@@ -55,6 +56,8 @@ func (s *Server) PrintBaseConfig() {
 	fmt.Println(" ")
 	fmt.Println(fmt.Sprintf("   WorkMode:    %s ", s.config.WorkMode))
 	fmt.Println(fmt.Sprintf("   ProxyMode:   %s ", s.config.L.ProxyMode.String()))
-	fmt.Println(fmt.Sprintf("   Http Listen: %s ", s.config.L.HttpAddress()))
+	if s.config.L.ProxyMode == global.HTTP {
+		fmt.Println(fmt.Sprintf("   Http Listen: %s ", s.config.L.HttpAddress()))
+	}
 	fmt.Println(fmt.Sprintf("   Start the service successfully and enjoy surfing. "))
 }

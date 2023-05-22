@@ -24,7 +24,7 @@ func (s *Server) StartListenHttp(in chan<- *tunnel.ConnContext) error {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
-				logger.Errorf("handle conn accept error: %s", err.Error())
+				logger.Errorf("Handle conn accept error: %s", err.Error())
 			}
 			go handleConn(conn, in)
 		}

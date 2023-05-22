@@ -56,13 +56,21 @@ func Parse(filePtah string) (*GlobalConfig, error) {
 
 func ParseRawConfig(raw *RawConfig) *GlobalConfig {
 	g := &GlobalConfig{
-		L:        &LocalConfig{},
+		L: &LocalConfig{
+			HttpProxyPort: C.DefaultPort,
+		},
 		Proxies:  map[string]*Proxy{},
 		WorkMode: raw.WorkMode,
 	}
-	g.L.HttpProxyPort = raw.HttpPort
-	g.L.MixedProxyPort = raw.MixedPort
-	g.L.SocksProxyPort = raw.SocksPort
+	if raw.HttpPort != 0 {
+		g.L.HttpProxyPort = raw.HttpPort
+	}
+	if raw.MixedPort != 0 {
+		g.L.MixedProxyPort = raw.MixedPort
+	}
+	if raw.SocksPort != 0 {
+		g.L.SocksProxyPort = raw.SocksPort
+	}
 	return g
 
 }

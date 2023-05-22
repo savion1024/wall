@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const (
+	DefaultPort = 5678
+)
+
 type ProxyMode int
 type WorkMode int
 
@@ -87,5 +91,3 @@ func (w *WorkMode) UnmarshalYAML(unmarshal func(any) error) error {
 	*w = mode
 	return nil
 }
-
-const DefaultPort = "5678"
