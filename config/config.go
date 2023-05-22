@@ -36,7 +36,7 @@ func (l *LocalConfig) HttpAddress() string {
 // Parse config from []byte
 func Parse(filePtah string) (*GlobalConfig, error) {
 	if filePtah == "" {
-		return nil, errors.New("i need yaml file so can start me")
+		return nil, errors.New("need config file")
 	}
 	if _, err := os.Stat(filePtah); err != nil {
 		return nil, errors.New("can't find file")

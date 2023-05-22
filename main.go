@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/savion1024/wall/config"
 	"github.com/savion1024/wall/server"
 	"log"
@@ -16,21 +17,20 @@ var (
 )
 
 func main() {
-	flag.StringVar(&configFile, "f", "", "specify configuration file")
-	flag.BoolVar(&testConfig, "t", false, "test configuration and exit")
+	flag.StringVar(&configFile, "f", "", "Specify configuration file")
+	flag.BoolVar(&testConfig, "t", false, "Test configuration and exit")
 	g, err := config.Parse(configFile)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf(fmt.Sprintf("Config parse failed: %s", err.Error()))
 	}
 	if testConfig {
-		log.Println("config parse success")
+		log.Println("Config parse success")
 		return
 	}
-	s, err := server.NewServer(g)
+	s := server.NewServer(g)
 
 	s.Run()
 	s.PrintBaseConfig()
-	log.Println("server start, listening")
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh

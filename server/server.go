@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/savion1024/wall/logger"
+	logger2 "github.com/savion1024/wall/logger"
 	"sync"
 
 	C "github.com/savion1024/wall/config"
@@ -11,9 +11,11 @@ import (
 
 var (
 	tcpQueue = make(chan *tunnel.ConnContext, 200)
+	logger   *logger2.Logger
 )
 
 func init() {
+	logger = logger2.NewStdLogger(true, false, true, true, false)
 	go func() {
 		queue := tcpQueue
 		for c := range queue {
@@ -26,21 +28,19 @@ func init() {
 type Server struct {
 	mu     sync.Mutex
 	config *C.GlobalConfig
-	logger *logger.Logger
 }
 
-func NewServer(g *C.GlobalConfig) (*Server, error) {
+func NewServer(g *C.GlobalConfig) *Server {
 	s := &Server{
 		config: g,
-		logger: logger.NewStdLogger(true, false, true, true, false),
 	}
-	return s, nil
+	return s
 }
 
 func (s *Server) Run() {
 	err := s.StartListenHttp(tcpQueue)
 	if err != nil {
-		s.logger.Fatalf("Run server failed: %s", err.Error())
+		logger.Fatalf("Run server failed: %s", err.Error())
 	}
 }
 
@@ -56,4 +56,5 @@ func (s *Server) PrintBaseConfig() {
 	fmt.Println(fmt.Sprintf("   WorkMode:    %s ", s.config.WorkMode))
 	fmt.Println(fmt.Sprintf("   ProxyMode:   %s ", s.config.L.ProxyMode.String()))
 	fmt.Println(fmt.Sprintf("   Http Listen: %s ", s.config.L.HttpAddress()))
+	fmt.Println(fmt.Sprintf("   Start the service successfully and enjoy surfing. "))
 }
