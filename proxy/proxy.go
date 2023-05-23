@@ -1,21 +1,17 @@
 package proxy
 
-import "net"
+import (
+	"github.com/savion1024/wall/common"
+)
 
 type Proxy struct {
-	host      string
-	port      string
-	name      string
-	alive     bool
-	proxyType string
-}
-
-func (p *Proxy) Name() string {
-	return p.name
-}
-
-func (p *Proxy) Alive() bool {
-	return p.alive
+	Host      string
+	Port      int
+	Name      string
+	Alive     bool
+	ProxyType string
+	Password  string
+	Sni       string
 }
 
 func (p *Proxy) LastDelay() uint16 {
@@ -23,5 +19,5 @@ func (p *Proxy) LastDelay() uint16 {
 }
 
 func (p *Proxy) Address() string {
-	return net.JoinHostPort(p.host, p.port)
+	return common.GenAddr(p.Host, p.Port)
 }

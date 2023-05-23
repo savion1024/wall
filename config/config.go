@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"github.com/savion1024/wall/common"
+	"github.com/savion1024/wall/proxy"
 	"gopkg.in/yaml.v3"
 	"os"
 
@@ -11,13 +12,12 @@ import (
 
 type GlobalConfig struct {
 	L        *LocalConfig
-	Proxies  map[string]*Proxy `json:"proxies"`
-	WorkMode C.WorkMode        `json:"work-mode"`
+	Proxies  map[string]Proxy `json:"proxies"`
+	Rules    []C.Rules
+	WorkMode C.WorkMode `json:"work-mode"`
 }
 
 type Proxy interface {
-	Name() string
-	Alive() bool
 	LastDelay() uint16
 	Address() string
 }
@@ -59,7 +59,7 @@ func ParseRawConfig(raw *RawConfig) *GlobalConfig {
 		L: &LocalConfig{
 			HttpProxyPort: C.DefaultPort,
 		},
-		Proxies:  map[string]*Proxy{},
+		Proxies:  map[string]Proxy{},
 		WorkMode: raw.WorkMode,
 	}
 	if raw.HttpPort != 0 {
@@ -70,6 +70,17 @@ func ParseRawConfig(raw *RawConfig) *GlobalConfig {
 	}
 	if raw.SocksPort != 0 {
 		g.L.SocksProxyPort = raw.SocksPort
+	}
+	// parse proxies
+	for _, p := range raw.Proxy {
+		op := &proxy.Proxy{}
+		op.Name = p["name"].(string)
+		op.Host = p["server"].(string)
+		op.Port = p["port"].(int)
+		op.ProxyType = p["type"].(string)
+		op.Password = p["password"].(string)
+		op.Sni = p["sni"].(string)
+		g.Proxies[op.Name] = op
 	}
 	return g
 
