@@ -2,10 +2,13 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/savion1024/wall/common"
 	"github.com/savion1024/wall/proxy"
+	"github.com/savion1024/wall/rules"
 	"gopkg.in/yaml.v3"
 	"os"
+	"strings"
 
 	C "github.com/savion1024/wall/constant"
 )
@@ -13,7 +16,7 @@ import (
 type GlobalConfig struct {
 	L        *LocalConfig
 	Proxies  map[string]Proxy `json:"proxies"`
-	Rules    []C.Rules
+	Rules    []rules.Rule
 	WorkMode C.WorkMode `json:"work-mode"`
 }
 
@@ -27,6 +30,17 @@ type LocalConfig struct {
 	HttpProxyPort  int         `json:"http-proxy-port"`
 	MixedProxyPort int         `json:"mixed-proxy-port"`
 	SocksProxyPort int         `json:"socks-proxy-port"`
+}
+
+type RawConfig struct {
+	HttpPort  int        `yaml:"http-port"`
+	SocksPort int        `yaml:"socks-port"`
+	MixedPort int        `yaml:"mixed-port"`
+	AllowLan  bool       `yaml:"allow-lan"`
+	WorkMode  C.WorkMode `yaml:"mode"`
+
+	Proxy []map[string]any `yaml:"proxies"`
+	Rules []string         `yaml:"rules"`
 }
 
 func (l *LocalConfig) HttpAddress() string {
@@ -49,12 +63,15 @@ func Parse(filePtah string) (*GlobalConfig, error) {
 	if err := yaml.Unmarshal(data, raw); err != nil {
 		return nil, err
 	}
-	g := ParseRawConfig(raw)
+	g, rerr := ParseRawConfig(raw)
+	if rerr != nil {
+		return nil, rerr
+	}
 	// TODO check config
 	return g, nil
 }
 
-func ParseRawConfig(raw *RawConfig) *GlobalConfig {
+func ParseRawConfig(raw *RawConfig) (*GlobalConfig, error) {
 	g := &GlobalConfig{
 		L: &LocalConfig{
 			HttpProxyPort: C.DefaultPort,
@@ -64,12 +81,15 @@ func ParseRawConfig(raw *RawConfig) *GlobalConfig {
 	}
 	if raw.HttpPort != 0 {
 		g.L.HttpProxyPort = raw.HttpPort
-	}
-	if raw.MixedPort != 0 {
-		g.L.MixedProxyPort = raw.MixedPort
+		g.L.ProxyMode = C.HTTP
 	}
 	if raw.SocksPort != 0 {
 		g.L.SocksProxyPort = raw.SocksPort
+		g.L.ProxyMode = C.SOCKS
+	}
+	if raw.MixedPort != 0 {
+		g.L.MixedProxyPort = raw.MixedPort
+		g.L.ProxyMode = C.MIXED
 	}
 	// parse proxies
 	for _, p := range raw.Proxy {
@@ -82,16 +102,57 @@ func ParseRawConfig(raw *RawConfig) *GlobalConfig {
 		op.Sni = p["sni"].(string)
 		g.Proxies[op.Name] = op
 	}
-	return g
+	// parse rules
+	r, err := parseRules(raw, g.Proxies)
+	if err != nil {
+		return nil, err
+	}
+	g.Rules = r
+	return g, nil
 
 }
 
-type RawConfig struct {
-	HttpPort  int        `yaml:"http-port"`
-	SocksPort int        `yaml:"socks-port"`
-	MixedPort int        `yaml:"mixed-port"`
-	AllowLan  bool       `yaml:"allow-lan"`
-	WorkMode  C.WorkMode `yaml:"mode"`
+func parseRules(cfg *RawConfig, proxies map[string]Proxy) ([]rules.Rule, error) {
+	var rulesArray []rules.Rule
+	rulesConfig := cfg.Rules
 
-	Proxy []map[string]any `yaml:"proxies"`
+	// parse rulesArray
+	for idx, line := range rulesConfig {
+		rule := common.TrimArr(strings.Split(line, ","))
+		var (
+			payload string
+			target  string
+			params  []string
+		)
+
+		switch l := len(rule); {
+		case l == 2:
+			target = rule[1]
+		case l == 3:
+			payload = rule[1]
+			target = rule[2]
+		case l >= 4:
+			payload = rule[1]
+			target = rule[2]
+			params = rule[3:]
+		default:
+			return nil, fmt.Errorf("rulesArray[%d] [%s] error: format invalid", idx, line)
+		}
+
+		if _, ok := proxies[target]; !ok {
+			return nil, fmt.Errorf("rulesArray[%d] [%s] error: proxy [%s] not found", idx, line, target)
+		}
+
+		rule = common.TrimArr(rule)
+		params = common.TrimArr(params)
+
+		parsed, parseErr := rules.ParseRule(rule[0], payload, target, params)
+		if parseErr != nil {
+			return nil, fmt.Errorf("rulesArray[%d] [%s] error: %s", idx, line, parseErr.Error())
+		}
+
+		rulesArray = append(rulesArray, parsed)
+	}
+
+	return rulesArray, nil
 }
