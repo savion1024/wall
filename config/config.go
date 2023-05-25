@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"github.com/savion1024/wall/common"
 	"github.com/savion1024/wall/proxy"
@@ -50,10 +49,10 @@ func (l *LocalConfig) HttpAddress() string {
 // Parse config from []byte
 func Parse(filePtah string) (*GlobalConfig, error) {
 	if filePtah == "" {
-		return nil, errors.New("need config file")
+		return nil, fmt.Errorf("need config file")
 	}
 	if _, err := os.Stat(filePtah); err != nil {
-		return nil, errors.New("can't find file")
+		return nil, fmt.Errorf("can't open file: %s ", filePtah)
 	}
 	data, err := os.ReadFile(filePtah)
 	if err != nil {
@@ -139,9 +138,9 @@ func parseRules(cfg *RawConfig, proxies map[string]Proxy) ([]rules.Rule, error) 
 			return nil, fmt.Errorf("rulesArray[%d] [%s] error: format invalid", idx, line)
 		}
 
-		if _, ok := proxies[target]; !ok {
-			return nil, fmt.Errorf("rulesArray[%d] [%s] error: proxy [%s] not found", idx, line, target)
-		}
+		//if _, ok := proxies[target]; !ok {
+		//	return nil, fmt.Errorf("rulesArray[%d] [%s] error: proxy [%s] not found", idx, line, target)
+		//}
 
 		rule = common.TrimArr(rule)
 		params = common.TrimArr(params)

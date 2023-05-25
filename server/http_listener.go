@@ -26,16 +26,16 @@ func (s *Server) StartListenHttp(in chan<- *tunnel.ConnContext) error {
 			if err != nil {
 				logger.Errorf("Handle conn accept error: %s", err.Error())
 			}
-			go handleConn(conn, in)
+			go handleConn(s.config.WorkMode, conn, in)
 		}
 	}()
 	return nil
 }
 
 // handleConn handle local http connect
-func handleConn(conn net.Conn, in chan<- *tunnel.ConnContext) {
+func handleConn(w global.WorkMode, conn net.Conn, in chan<- *tunnel.ConnContext) {
 	// TODO new connContext and push in tcp queue
-	c := tunnel.NewConnContext()
+	c := tunnel.NewConnContext(w)
 	c.LocalConn = conn
 	in <- c
 }

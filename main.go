@@ -19,6 +19,7 @@ var (
 func main() {
 	flag.StringVar(&configFile, "f", "", "Specify configuration file")
 	flag.BoolVar(&testConfig, "t", false, "Test configuration and exit")
+	configFile = "/Users/savion/Desktop/wall.yaml"
 	g, err := config.Parse(configFile)
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("Config parse failed: %s", err.Error()))

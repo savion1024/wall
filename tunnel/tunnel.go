@@ -1,5 +1,6 @@
 package tunnel
 
+import "C"
 import (
 	"context"
 	"log"

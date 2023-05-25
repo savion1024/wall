@@ -3,6 +3,7 @@ package tunnel
 import "C"
 import (
 	"context"
+	global "github.com/savion1024/wall/constant"
 	"io"
 	"net"
 	"time"
@@ -12,6 +13,7 @@ import (
 
 type ConnContext struct {
 	ConnId     uuid.UUID
+	WorkMode   global.WorkMode
 	LocalConn  net.Conn
 	RemoteConn net.Conn
 }
@@ -29,9 +31,9 @@ func (c *ConnContext) DialRemote(ctx context.Context, address string) (net.Conn,
 	return remoteConn, nil
 }
 
-func NewConnContext() *ConnContext {
+func NewConnContext(w global.WorkMode) *ConnContext {
 	id, _ := uuid.NewV4()
-	return &ConnContext{ConnId: id}
+	return &ConnContext{ConnId: id, WorkMode: w}
 }
 
 func (c *ConnContext) exchangeConnData() {
